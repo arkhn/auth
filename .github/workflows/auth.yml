@@ -22,17 +22,18 @@ jobs:
       - name: Cache node modules
         uses: actions/cache@v1
         with:
-          path: server/node_modules
+          path: node_modules
           key: ${{ runner.OS }}-${{ matrix.node-version}}-node-modules-${{ hashFiles('yarn.lock') }}
 
       - name: Install Dependencies
         run: |
-          cd server
           yarn install
 
       - name: Build
+        env:
+          JWT_PRIVATE_KEY: none
+          JWT_PUBLIC_KEY: none
         run: |
-          cd server
           yarn build
 
   publish:
