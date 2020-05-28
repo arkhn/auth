@@ -1,0 +1,35 @@
+version: '3.7'
+
+services:
+  auth:
+    image: arkhn/auth:latest
+    container_name: auth
+    build:
+      context: .
+    ports:
+      - 6001:6001
+    env_file: .env.docker
+    depends_on:
+      - postgres
+    networks:
+      - arkhn
+
+  postgres:
+    image: postgres
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: prisma
+      POSTGRES_PASSWORD: prisma
+      POSTGRES_DB: prisma
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - arkhn
+
+volumes:
+  postgres-data:
+
+networks:
+  arkhn:
+    name: arkhn_network
