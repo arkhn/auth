@@ -1,0 +1,61 @@
+name: auth
+
+on: [push]
+
+jobs:
+  build:
+    name: Build Auth service
+    runs-on: ubuntu-18.04
+
+    strategy:
+      matrix:
+        node-version: [12.x]
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Cache node modules
+        uses: actions/cache@v1
+        with:
+          path: node_modules
+          key: ${{ runner.OS }}-${{ matrix.node-version}}-node-modules-${{ hashFiles('yarn.lock') }}
+
+      - name: Install Dependencies
+        run: |
+          yarn install
+
+      - name: Build
+        env:
+          JWT_PRIVATE_KEY: none
+          JWT_PUBLIC_KEY: none
+        run: |
+          yarn build
+
+  publish:
+    name: Build and publish
+    env:
+      IMAGE: arkhn/auth
+    runs-on: ubuntu-18.04
+    needs: build
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Build
+        run: |
+          yarn build:docker
+
+      - name: Tag docker images
+        run: |
+          docker tag $IMAGE $IMAGE:$GITHUB_SHA
+
+      - name: Publish to the docker hub
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" |  docker login -u ${{ secrets.DOCKER_LOGIN }} --password-stdin
+          docker push $IMAGE:latest
+          docker push $IMAGE:$GITHUB_SHA
