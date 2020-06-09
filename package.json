@@ -5,7 +5,7 @@
   "scripts": {
     "build": "yarn -s run clean && yarn -s run generate && tsc --project tsconfig.build.json",
     "clean": "rm -rf dist",
-    "build:docker": "docker-compose build auth",
+    "build:docker": "docker build -t arkhn/auth:latest .",
     "generate": "yarn -s run generate:prisma && yarn -s run generate:nexus",
     "generate:prisma": "prisma generate",
     "generate:nexus": "yarn run-ts --transpile-only src/schema",
